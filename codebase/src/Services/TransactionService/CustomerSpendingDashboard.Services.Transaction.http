@@ -1,0 +1,6 @@
+@CustomerSpendingDashboard.Services.Transaction_HostAddress = http://localhost:5135
+
+GET {{CustomerSpendingDashboard.Services.Transaction_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

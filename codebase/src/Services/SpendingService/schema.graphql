@@ -1,0 +1,68 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+}
+
+type CategorySpending {
+  name: String!
+  amount: Decimal!
+  percentage: Decimal!
+  transactionCount: Int!
+  color: String!
+  icon: String!
+}
+
+type ComparedToPrevious {
+  spentChange: Decimal!
+  transactionChange: Decimal!
+}
+
+type DateRange {
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+type MonthlyTrend {
+  month: String!
+  totalSpent: Decimal!
+  transactionCount: Int!
+  averageTransaction: Decimal!
+}
+
+type Mutation {
+  updateSpendingCategory(customerId: String! categoryName: String! newName: String color: String icon: String): Boolean!
+}
+
+type Query {
+  spendingSummary(customerId: String! period: String! = "30d"): SpendingSummary!
+  spendingByCategory(customerId: String! period: String startDate: DateTime endDate: DateTime): SpendingByCategory!
+  spendingTrends(customerId: String! months: Int! = 12): SpendingTrends!
+}
+
+type SpendingByCategory {
+  dateRange: DateRange!
+  totalAmount: Decimal!
+  categories: [CategorySpending!]!
+}
+
+type SpendingSummary {
+  period: String!
+  totalSpent: Decimal!
+  transactionCount: Int!
+  averageTransaction: Decimal!
+  topCategory: String!
+  comparedToPrevious: ComparedToPrevious!
+}
+
+type SpendingTrends {
+  trends: [MonthlyTrend!]!
+}
+
+"The `@specifiedBy` directive is used within the type system definition language to provide a URL for specifying the behavior of custom scalar definitions."
+directive @specifiedBy("The specifiedBy URL points to a human-readable specification. This field will only read a result for scalar types." url: String!) on SCALAR
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime @specifiedBy(url: "https:\/\/www.graphql-scalars.com\/date-time")
+
+"The `Decimal` scalar type represents a decimal floating-point number."
+scalar Decimal

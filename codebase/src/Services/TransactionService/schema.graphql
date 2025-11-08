@@ -1,0 +1,82 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+}
+
+type CategoryFilter {
+  name: String!
+  color: String!
+  icon: String!
+}
+
+type DateRangePreset {
+  label: String!
+  value: String!
+}
+
+type Filters {
+  categories: [CategoryFilter!]!
+  dateRangePresets: [DateRangePreset!]!
+}
+
+type Mutation {
+  createTransaction(customerId: String! date: DateTime! merchant: String! category: String! amount: Decimal! description: String! paymentMethod: String!): Transaction!
+  updateTransaction(transactionId: String! date: DateTime merchant: String category: String amount: Decimal description: String paymentMethod: String): Transaction!
+  deleteTransaction(transactionId: String!): Boolean!
+  createSpendingGoal(customerId: String! category: String! monthlyBudget: Decimal!): SpendingGoal!
+  updateSpendingGoal(goalId: String! monthlyBudget: Decimal): SpendingGoal!
+  deleteSpendingGoal(goalId: String!): Boolean!
+}
+
+type PaginationInfo {
+  total: Int!
+  limit: Int!
+  offset: Int!
+  hasMore: Boolean!
+}
+
+type Query {
+  transactions(customerId: String! limit: Int! = 20 offset: Int! = 0 category: String startDate: DateTime endDate: DateTime sortBy: String! = "date_desc"): TransactionList!
+  spendingGoals(customerId: String!): SpendingGoals!
+  filters(customerId: String!): Filters!
+}
+
+type SpendingGoal {
+  id: String!
+  category: String!
+  monthlyBudget: Decimal!
+  currentSpent: Decimal!
+  percentageUsed: Decimal!
+  daysRemaining: Int!
+  status: String!
+}
+
+type SpendingGoals {
+  goals: [SpendingGoal!]!
+}
+
+type Transaction {
+  id: String!
+  date: DateTime!
+  merchant: String!
+  category: String!
+  amount: Decimal!
+  description: String!
+  paymentMethod: String!
+  icon: String!
+  categoryColor: String!
+}
+
+type TransactionList {
+  transactions: [Transaction!]!
+  pagination: PaginationInfo!
+}
+
+"The `@specifiedBy` directive is used within the type system definition language to provide a URL for specifying the behavior of custom scalar definitions."
+directive @specifiedBy("The specifiedBy URL points to a human-readable specification. This field will only read a result for scalar types." url: String!) on SCALAR
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime @specifiedBy(url: "https:\/\/www.graphql-scalars.com\/date-time")
+
+"The `Decimal` scalar type represents a decimal floating-point number."
+scalar Decimal

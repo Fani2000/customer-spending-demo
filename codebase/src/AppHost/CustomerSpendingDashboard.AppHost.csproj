@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>32bf4c4b-7c02-4ae3-8030-354a00180d2f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.0.0" />
+    <PackageReference Include="HotChocolate.Fusion.Aspire" Version="15.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gateway\Gateway.csproj" />
+    <ProjectReference Include="..\Services\TransactionService\CustomerSpendingDashboard.Services.Transaction.csproj" />
+    <ProjectReference Include="..\Services\CustomerService\CustomerSpendingDashboard.Services.Customer.csproj" />
+    <ProjectReference Include="..\Services\SpendingService\CustomerSpendingDashboard.Services.Spending.csproj" />
+  </ItemGroup>
+
+</Project>
