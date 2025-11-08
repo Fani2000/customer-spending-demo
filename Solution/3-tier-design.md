@@ -36,7 +36,7 @@ This document describes an evolution path from a classic **3‑tier architecture
 ```mermaid
 flowchart LR
   Browser -->|HTTP| Web[Web Server / SPA]
-  Web -->|API| App[App Server (Backend)]
+  Web -->|API| App[App Server Backend]
   App -->|SQL| DB[(Database)]
 ```
 
