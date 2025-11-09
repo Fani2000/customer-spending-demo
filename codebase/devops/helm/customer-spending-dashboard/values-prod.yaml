@@ -1,0 +1,224 @@
+# Production Environment Values
+# Override default values for production
+
+global:
+  environment: production
+  imageRegistry: "acr.azurecr.io"
+  imagePullSecrets:
+    - name: acr-secret
+
+# PostgreSQL Configuration
+# Note: In production, consider using managed PostgreSQL service (Azure Database for PostgreSQL)
+postgresql:
+  enabled: false  # Set to false if using managed database
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: Always
+  auth:
+    postgresPassword: ""  # Should be set via external secret management
+    database: "customerdb"
+    username: "postgres"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "managed-premium"
+  service:
+    type: ClusterIP
+    port: 5432
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Customer Service
+customerService:
+  enabled: true
+  image:
+    repository: customer-spending/customer-service
+    tag: "latest"  # Use specific version tags in production
+    pullPolicy: Always
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+    ASPNETCORE_URLS: "http://+:8080"
+
+# Spending Service
+spendingService:
+  enabled: true
+  image:
+    repository: customer-spending/spending-service
+    tag: "latest"  # Use specific version tags in production
+    pullPolicy: Always
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+    ASPNETCORE_URLS: "http://+:8080"
+
+# Transaction Service
+transactionService:
+  enabled: true
+  image:
+    repository: customer-spending/transaction-service
+    tag: "latest"  # Use specific version tags in production
+    pullPolicy: Always
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+    ASPNETCORE_URLS: "http://+:8080"
+
+# Gateway Service
+gateway:
+  enabled: true
+  image:
+    repository: customer-spending/gateway
+    tag: "latest"  # Use specific version tags in production
+    pullPolicy: Always
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "400m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    ASPNETCORE_ENVIRONMENT: "Production"
+    ASPNETCORE_URLS: "http://+:8080"
+    Cors__AllowedOrigins__0: "https://app.customer-spending.com"
+    Cors__AllowedOrigins__1: "https://www.customer-spending.com"
+
+# Frontend
+frontend:
+  enabled: true
+  image:
+    repository: customer-spending/frontend
+    tag: "latest"  # Use specific version tags in production
+    pullPolicy: Always
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    VITE_GRAPHQL_ENDPOINT: "/graphql"
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+  hosts:
+    - host: app.customer-spending.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /graphql
+          pathType: Prefix
+          service: gateway
+  tls:
+    - secretName: customer-spending-tls
+      hosts:
+        - app.customer-spending.com
+        - www.customer-spending.com
+
+# Secrets (should be managed via external secret management like Azure Key Vault)
+secrets:
+  postgresPassword: ""  # Should be retrieved from Azure Key Vault or similar
+
+# ConfigMaps
+# In production, connection string should point to managed PostgreSQL service
+configMap:
+  database:
+    connectionString: ""  # Should be set via external secret management
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Network Policies
+networkPolicy:
+  enabled: true
+
+# Service Monitor for Prometheus
+serviceMonitor:
+  enabled: true
+

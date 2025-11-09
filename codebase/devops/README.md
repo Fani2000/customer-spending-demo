@@ -1,4 +1,4 @@
-# DevOps Documentation — Customer Spending Dashboard
+# DevOps Documentation - Customer Spending Dashboard
 
 This document provides comprehensive DevOps documentation including architecture diagrams, deployment strategies, CI/CD pipelines, and operational guidelines for the Customer Spending Dashboard.
 
@@ -14,7 +14,7 @@ This document provides comprehensive DevOps documentation including architecture
 6. [Deployment Architecture](#deployment-architecture)
 7. [CI/CD Pipeline](#cicd-pipeline)
 8. [Environment Configuration](#environment-configuration)
-9. [Monitoring & Observability](#monitoring--observability)
+9. [Monitoring & Observability](#monitoring-observability)
 10. [Scaling Strategy](#scaling-strategy)
 11. [Security Considerations](#security-considerations)
 12. [Disaster Recovery](#disaster-recovery)

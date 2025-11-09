@@ -1,0 +1,77 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: gateway
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: gateway
+  template:
+    metadata:
+      labels:
+        {{- include "customer-spending-dashboard.selectorLabels" . | nindent 8 }}
+        component: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: "{{ .Values.global.imageRegistry }}{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+        imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: {{ .Values.gateway.env.ASPNETCORE_ENVIRONMENT | quote }}
+        - name: ASPNETCORE_URLS
+          value: {{ .Values.gateway.env.ASPNETCORE_URLS | quote }}
+        {{- range $key, $value := .Values.gateway.env }}
+        {{- if and (ne $key "ASPNETCORE_ENVIRONMENT") (ne $key "ASPNETCORE_URLS") }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /graphql
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /graphql
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.gateway.resources | nindent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: gateway
+spec:
+  type: {{ .Values.gateway.service.type }}
+  ports:
+  - port: {{ .Values.gateway.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "customer-spending-dashboard.selectorLabels" . | nindent 4 }}
+    component: gateway
+{{- end }}
+

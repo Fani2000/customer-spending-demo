@@ -1,6 +1,6 @@
 {
   "subgraph": "CustomerService",
   "http": {
-    "baseAddress": "http://localhost:5001/graphql"
+    "baseAddress": "http://customer-service:8080/graphql"
   }
 }

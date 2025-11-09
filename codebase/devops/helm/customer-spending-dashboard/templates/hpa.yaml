@@ -1,0 +1,170 @@
+{{- if .Values.customerService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-customer-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: customer-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "customer-spending-dashboard.fullname" . }}-customer-service
+  minReplicas: {{ .Values.customerService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.customerService.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.customerService.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.customerService.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.customerService.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.customerService.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.spendingService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-spending-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: spending-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "customer-spending-dashboard.fullname" . }}-spending-service
+  minReplicas: {{ .Values.spendingService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.spendingService.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.spendingService.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.spendingService.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.spendingService.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.spendingService.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.transactionService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-transaction-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: transaction-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "customer-spending-dashboard.fullname" . }}-transaction-service
+  minReplicas: {{ .Values.transactionService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.transactionService.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.transactionService.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.transactionService.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.transactionService.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.transactionService.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.gateway.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  minReplicas: {{ .Values.gateway.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.gateway.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.gateway.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.gateway.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.gateway.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.gateway.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.frontend.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-frontend
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: frontend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "customer-spending-dashboard.fullname" . }}-frontend
+  minReplicas: {{ .Values.frontend.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.frontend.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.frontend.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.frontend.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.frontend.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.frontend.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}
+

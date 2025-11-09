@@ -1,0 +1,17 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.dockerignore
+**/Dockerfile
+**/docker-compose.yml
+**/*.md
+**/.env
+**/.env.local
+**/.env.*.local
+**/launchSettings.json
+**/Properties/launchSettings.json
+

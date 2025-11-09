@@ -1,0 +1,16 @@
+apiVersion: v2
+name: customer-spending-dashboard
+description: A Helm chart for Customer Spending Dashboard microservices application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - customer-spending
+  - graphql
+  - microservices
+  - .net
+  - react
+maintainers:
+  - name: DevOps Team
+dependencies: []
+

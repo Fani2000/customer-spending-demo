@@ -1,0 +1,16 @@
+{{- if .Values.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-config
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+data:
+  Database__ConnectionString: {{ include "customer-spending-dashboard.postgresConnectionString" . | quote }}
+  {{- range $key, $value := .Values.configMap }}
+  {{- if ne $key "database" }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+

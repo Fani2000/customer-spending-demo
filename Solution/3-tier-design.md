@@ -96,17 +96,16 @@ flowchart LR
 ```mermaid
 flowchart LR
   Browser --> SPA
-  SPA -->|API| API Gateway
-  API Gateway --> S1[Auth Service]
-  API Gateway --> S2[Customer Service]
-  API Gateway --> S3[Transaction Service]
-  API Gateway --> S4[Analytics Service]
+  SPA --> |API| GATEWAY
+  Gateway --> S1[Auth Service]
+  Gateway --> S2[Customer Service]
+  Gateway --> S3[Transaction Service]
+  Gateway --> S4[Analytics Service]
   S1 --> DB1[(Auth DB)]
   S2 --> DB2[(Customer DB)]
   S3 --> DB3[(Transactions DB)]
   S4 --> DB4[(Analytics DW)]
 ```
-
 **Characteristics**
 
 * Each service independently deployable and owns its data

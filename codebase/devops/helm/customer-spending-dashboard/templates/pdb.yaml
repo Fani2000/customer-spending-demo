@@ -1,0 +1,74 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-customer-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: customer-service
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: customer-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-spending-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: spending-service
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: spending-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-transaction-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: transaction-service
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: transaction-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: gateway
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 4 }}
+      component: gateway
+{{- end }}
+

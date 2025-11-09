@@ -15,4 +15,9 @@
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Include gateway configuration files in publish output -->
+    <Content Include="*.fgp" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

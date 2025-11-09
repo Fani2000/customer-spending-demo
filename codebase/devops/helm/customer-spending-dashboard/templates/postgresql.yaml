@@ -1,0 +1,115 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-postgres
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: postgresql
+spec:
+  serviceName: {{ include "customer-spending-dashboard.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: postgresql
+  template:
+    metadata:
+      labels:
+        {{- include "customer-spending-dashboard.selectorLabels" . | nindent 8 }}
+        component: postgresql
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+        imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+        ports:
+        - name: postgresql
+          containerPort: 5432
+          protocol: TCP
+        env:
+        - name: POSTGRES_USER
+          value: {{ .Values.postgresql.auth.username | quote }}
+        - name: POSTGRES_PASSWORD
+          {{- if .Values.secrets.postgresPassword }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "customer-spending-dashboard.fullname" . }}-secrets
+              key: postgres-password
+          {{- else }}
+          value: {{ .Values.postgresql.auth.postgresPassword | quote }}
+          {{- end }}
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresql.auth.database | quote }}
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U {{ .Values.postgresql.auth.username }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U {{ .Values.postgresql.auth.username }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.postgresql.resources | nindent 10 }}
+      volumes:
+      - name: data
+        {{- if .Values.postgresql.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "customer-spending-dashboard.fullname" . }}-postgres-data
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-postgres
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: postgresql
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  ports:
+  - port: {{ .Values.postgresql.service.port }}
+    targetPort: postgresql
+    protocol: TCP
+    name: postgresql
+  selector:
+    {{- include "customer-spending-dashboard.selectorLabels" . | nindent 4 }}
+    component: postgresql
+---
+{{- if .Values.postgresql.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-postgres-data
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: postgresql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgresql.persistence.size }}
+  {{- if .Values.postgresql.persistence.storageClass }}
+  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
