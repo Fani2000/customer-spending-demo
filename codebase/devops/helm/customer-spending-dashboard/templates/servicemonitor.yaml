@@ -1,0 +1,78 @@
+{{- if and .Values.serviceMonitor.enabled .Values.prometheus.enabled }}
+{{- if .Values.customerService.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-customer-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: customer-service
+spec:
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: customer-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+{{- end }}
+{{- if .Values.spendingService.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-spending-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: spending-service
+spec:
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: spending-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+{{- end }}
+{{- if .Values.transactionService.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-transaction-service
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: transaction-service
+spec:
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: transaction-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+{{- end }}
+{{- if .Values.gateway.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-gateway
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: gateway
+spec:
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: gateway
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+{{- end }}
+{{- end }}
+

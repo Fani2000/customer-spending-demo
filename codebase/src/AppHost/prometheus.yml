@@ -1,0 +1,58 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'customer-spending-dashboard'
+    environment: 'development'
+
+# Note: This configuration is for LOCAL Aspire development
+# Services run as processes on localhost with dynamic ports assigned by Aspire
+# Prometheus (running in container) accesses them via host.docker.internal
+# 
+# IMPORTANT: Ports are dynamic - check Aspire Dashboard for actual ports
+# Update the targets below with the actual ports from the Aspire Dashboard
+# 
+# For Docker Compose, use: devops/docker/monitoring/prometheus/prometheus.yml
+# which uses Docker service names (e.g., gateway:8080, customer-service:8080)
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Gateway - Check Aspire Dashboard for actual port (typically 5098 or similar)
+  - job_name: 'gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5098']  # Update with actual port from Aspire Dashboard
+        labels:
+          service: 'gateway'
+          component: 'api-gateway'
+
+  # Customer Service - Check Aspire Dashboard for actual port
+  - job_name: 'customer-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5001']  # Update with actual port from Aspire Dashboard
+        labels:
+          service: 'customer-service'
+          component: 'backend-service'
+
+  # Spending Service - Check Aspire Dashboard for actual port
+  - job_name: 'spending-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5002']  # Update with actual port from Aspire Dashboard
+        labels:
+          service: 'spending-service'
+          component: 'backend-service'
+
+  # Transaction Service - Check Aspire Dashboard for actual port
+  - job_name: 'transaction-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5003']  # Update with actual port from Aspire Dashboard
+        labels:
+          service: 'transaction-service'
+          component: 'backend-service'
+

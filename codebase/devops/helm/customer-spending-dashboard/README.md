@@ -96,9 +96,12 @@ The chart deploys the following components:
 - **Transaction Service**: GraphQL service for transactions and goals
 - **Gateway**: HotChocolate Fusion Gateway
 - **Frontend**: React frontend application
+- **Prometheus**: Metrics collection and storage (optional)
+- **Grafana**: Visualization and dashboards (optional)
 - **Ingress**: NGINX ingress controller configuration
 - **HPA**: Horizontal Pod Autoscalers for all services
 - **PDB**: Pod Disruption Budgets for high availability
+- **ServiceMonitor**: Prometheus ServiceMonitor resources (optional)
 
 ## Service Endpoints
 
@@ -107,6 +110,22 @@ After installation, services are available at:
 - **Frontend**: Configured via Ingress
 - **GraphQL Gateway**: `/graphql` endpoint via Ingress
 - **Backend Services**: Internal ClusterIP services
+- **Prometheus**: Internal ClusterIP service (port 9090)
+- **Grafana**: Internal ClusterIP service (port 3000)
+
+### Accessing Monitoring Services
+
+To access Prometheus or Grafana, use port forwarding:
+
+```bash
+# Prometheus
+kubectl port-forward svc/customer-spending-dashboard-prometheus 9090:9090 -n customer-spending-prod
+
+# Grafana
+kubectl port-forward svc/customer-spending-dashboard-grafana 3001:3000 -n customer-spending-prod
+```
+
+Or configure Ingress rules to expose them publicly (not recommended for production without authentication).
 
 ## Scaling
 
@@ -123,12 +142,56 @@ customerService:
 
 ## Monitoring
 
-Enable ServiceMonitor for Prometheus:
+### Prometheus and Grafana
+
+The chart includes optional Prometheus and Grafana deployments for monitoring:
+
+```yaml
+prometheus:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+  retention:
+    time: "200h"
+
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: admin
+  persistence:
+    enabled: true
+    size: 5Gi
+```
+
+### ServiceMonitor
+
+Enable ServiceMonitor for Prometheus Operator integration:
 
 ```yaml
 serviceMonitor:
   enabled: true
 ```
+
+This creates ServiceMonitor resources that Prometheus Operator can discover automatically.
+
+### Metrics Endpoints
+
+All services expose Prometheus metrics at `/metrics` endpoint. Ensure your services have metrics enabled:
+
+```csharp
+// In Program.cs
+builder.Services.AddPrometheusMetrics();
+app.UseMetricServer(); // Exposes /metrics endpoint
+```
+
+### Grafana Dashboards
+
+Pre-configured dashboards are available in Grafana:
+- Customer Spending Dashboard - Overview
+- Customer Spending Dashboard - Services
+
+Access Grafana and import dashboards or create custom ones based on your metrics.
 
 ## Troubleshooting
 

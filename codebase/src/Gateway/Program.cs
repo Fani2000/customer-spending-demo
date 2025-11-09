@@ -1,3 +1,5 @@
+using Prometheus;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient("Fusion");
@@ -72,6 +74,10 @@ else
 fusionBuilder.ModifyFusionOptions(x => x.AllowQueryPlan = true);
 
 var app = builder.Build();
+
+// Expose Prometheus metrics endpoint (before other middleware for accurate metrics)
+app.UseMetricServer(); // Exposes /metrics endpoint
+app.UseHttpMetrics();  // Tracks HTTP metrics
 
 // Enable CORS before other middleware
 app.UseCors();

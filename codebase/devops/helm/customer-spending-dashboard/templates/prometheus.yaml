@@ -1,0 +1,161 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-prometheus
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "customer-spending-dashboard.selectorLabels" . | nindent 6 }}
+      component: prometheus
+  template:
+    metadata:
+      labels:
+        {{- include "customer-spending-dashboard.selectorLabels" . | nindent 8 }}
+        component: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
+        imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--storage.tsdb.retention.time={{ .Values.prometheus.retention.time }}'
+          - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+          - '--web.console.templates=/usr/share/prometheus/consoles'
+          - '--web.enable-lifecycle'
+        ports:
+        - name: http
+          containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: storage
+          mountPath: /prometheus
+        resources:
+          {{- toYaml .Values.prometheus.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "customer-spending-dashboard.fullname" . }}-prometheus-config
+      - name: storage
+        {{- if .Values.prometheus.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "customer-spending-dashboard.fullname" . }}-prometheus-storage
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-prometheus
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: prometheus
+spec:
+  type: {{ .Values.prometheus.service.type }}
+  ports:
+  - port: {{ .Values.prometheus.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "customer-spending-dashboard.selectorLabels" . | nindent 4 }}
+    component: prometheus
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-prometheus-config
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: '{{ .Release.Name }}'
+        environment: '{{ .Values.global.environment }}'
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'gateway'
+        metrics_path: '/metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - {{ .Release.Namespace }}
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: '.*-gateway'
+            action: keep
+
+      - job_name: 'customer-service'
+        metrics_path: '/metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - {{ .Release.Namespace }}
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: '.*-customer-service'
+            action: keep
+
+      - job_name: 'spending-service'
+        metrics_path: '/metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - {{ .Release.Namespace }}
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: '.*-spending-service'
+            action: keep
+
+      - job_name: 'transaction-service'
+        metrics_path: '/metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - {{ .Release.Namespace }}
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: '.*-transaction-service'
+            action: keep
+{{- if .Values.prometheus.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "customer-spending-dashboard.fullname" . }}-prometheus-storage
+  labels:
+    {{- include "customer-spending-dashboard.labels" . | nindent 4 }}
+    component: prometheus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.prometheus.persistence.size }}
+  {{- if .Values.prometheus.persistence.storageClass }}
+  storageClassName: {{ .Values.prometheus.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}
+

@@ -222,3 +222,43 @@ networkPolicy:
 serviceMonitor:
   enabled: true
 
+# Prometheus Configuration
+prometheus:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: "managed-premium"
+  retention:
+    time: "720h"  # 30 days
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+# Grafana Configuration
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: ""  # Should be set via external secret management
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "managed-premium"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://customer-spending-dashboard-prometheus:9090
+      access: proxy
+      isDefault: true
+

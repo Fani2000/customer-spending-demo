@@ -6,9 +6,24 @@ This directory contains the Docker Compose configuration for running the Custome
 
 - Docker Desktop (or Docker Engine + Docker Compose)
 - At least 4GB of available RAM
-- Ports 3000, 5000, 5001, 5002, 5003, and 5432 available
+- Ports 3000, 3001, 5000, 5001, 5002, 5003, 5432, and 9090 available
 
 ## Quick Start
+
+**Option 1: Using the convenience script (Recommended)**
+
+Simply run:
+```bash
+cd codebase/devops/docker
+./start.sh
+```
+
+This script will:
+- Generate the gateway configuration if needed
+- Build and start all services including Prometheus and Grafana
+- Display service status and access URLs
+
+**Option 2: Manual Start**
 
 1. **Generate Gateway Configuration (First Time Only)**
    
@@ -27,7 +42,7 @@ This directory contains the Docker Compose configuration for running the Custome
 
 3. Build and start all services:
    ```bash
-   docker-compose up --build
+   docker-compose up -d --build
    ```
 
 4. Access the application:
@@ -36,6 +51,8 @@ This directory contains the Docker Compose configuration for running the Custome
    - Customer Service: http://localhost:5001/graphql
    - Spending Service: http://localhost:5002/graphql
    - Transaction Service: http://localhost:5003/graphql
+   - Prometheus: http://localhost:9090
+   - Grafana: http://localhost:3001 (admin/admin)
 
 ## Services
 
@@ -47,6 +64,10 @@ The Docker Compose setup includes:
 - **transaction-service**: Transaction and goals GraphQL service
 - **gateway**: HotChocolate Fusion Gateway
 - **frontend**: React frontend application
+- **prometheus**: Metrics collection and storage
+- **grafana**: Visualization and dashboards
+
+See [MONITORING.md](./MONITORING.md) for detailed monitoring documentation.
 
 ## Building Individual Services
 
@@ -117,10 +138,12 @@ The Gateway has been updated to automatically look for `gateway.docker.fgp` firs
 
 **Step 1: Update Subgraph Configuration Files**
 
-The `subgraph-config.json` files in each service have been updated to use Docker service names:
-- `codebase/src/Services/CustomerService/subgraph-config.json` → `http://customer-service:8080/graphql`
-- `codebase/src/Services/SpendingService/subgraph-config.json` → `http://spending-service:8080/graphql`
-- `codebase/src/Services/TransactionService/subgraph-config.json` → `http://transaction-service:8080/graphql`
+**Note**: The `subgraph-config.json` files are configured for **local development** (using `localhost`):
+- `codebase/src/Services/CustomerService/subgraph-config.json` → `http://localhost:5001/graphql`
+- `codebase/src/Services/SpendingService/subgraph-config.json` → `http://localhost:5002/graphql`
+- `codebase/src/Services/TransactionService/subgraph-config.json` → `http://localhost:5003/graphql`
+
+The `generate-gateway-config.sh` script automatically updates these files to Docker service names (`customer-service:8080`, etc.) during gateway generation, then restores them for local development.
 
 **Step 2: Export Schemas from Each Service**
 

@@ -13,6 +13,7 @@
     <PackageReference Include="HotChocolate.Diagnostics" Version="15.1.3" />
     <PackageReference Include="HotChocolate.Fusion" Version="15.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.11" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
   </ItemGroup>
 
   <ItemGroup>

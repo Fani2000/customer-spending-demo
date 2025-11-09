@@ -4,6 +4,25 @@
 
 set -e
 
+# Cleanup function to restore original configs on exit
+cleanup() {
+    echo ""
+    echo "Cleaning up..."
+    SERVICES=("CustomerService" "SpendingService" "TransactionService")
+    PROJECT_ROOT="$(cd "$(dirname "$0")/../../src" && pwd)"
+    
+    for SERVICE in "${SERVICES[@]}"; do
+        SERVICE_DIR="$PROJECT_ROOT/Services/$SERVICE"
+        if [ -f "$SERVICE_DIR/subgraph-config.json.backup" ]; then
+            mv "$SERVICE_DIR/subgraph-config.json.backup" "$SERVICE_DIR/subgraph-config.json"
+            echo "✓ Restored $SERVICE subgraph-config.json"
+        fi
+    done
+}
+
+# Register cleanup function
+trap cleanup EXIT
+
 echo "=========================================="
 echo "Generating gateway.docker.fgp for Docker"
 echo "=========================================="
@@ -42,7 +61,38 @@ for SERVICE in "${SERVICES[@]}"; do
 done
 
 echo ""
-echo "Step 2: Packing subgraphs..."
+echo "Step 2: Updating subgraph-config.json for Docker..."
+echo "----------------------------------------"
+
+# Backup and update subgraph-config.json files for Docker
+declare -A SERVICE_NAMES
+SERVICE_NAMES["CustomerService"]="customer-service"
+SERVICE_NAMES["SpendingService"]="spending-service"
+SERVICE_NAMES["TransactionService"]="transaction-service"
+
+# Backup original configs and update for Docker
+for SERVICE in "${SERVICES[@]}"; do
+    SERVICE_DIR="$PROJECT_ROOT/Services/$SERVICE"
+    if [ -d "$SERVICE_DIR" ] && [ -f "$SERVICE_DIR/subgraph-config.json" ]; then
+        # Backup original config
+        cp "$SERVICE_DIR/subgraph-config.json" "$SERVICE_DIR/subgraph-config.json.backup"
+        
+        # Update with Docker service name
+        SERVICE_NAME="${SERVICE_NAMES[$SERVICE]}"
+        cat > "$SERVICE_DIR/subgraph-config.json" <<EOF
+{
+  "subgraph": "$SERVICE",
+  "http": {
+    "baseAddress": "http://$SERVICE_NAME:8080/graphql"
+  }
+}
+EOF
+        echo "✓ Updated $SERVICE subgraph-config.json for Docker"
+    fi
+done
+
+echo ""
+echo "Step 3: Packing subgraphs..."
 echo "----------------------------------------"
 
 # Pack each subgraph
@@ -62,7 +112,7 @@ for SERVICE in "${SERVICES[@]}"; do
 done
 
 echo ""
-echo "Step 3: Composing gateway schema..."
+echo "Step 4: Composing gateway schema..."
 echo "----------------------------------------"
 
 # Compose the gateway
@@ -87,12 +137,31 @@ for SERVICE in "${SERVICES[@]}"; do
 done
 
 echo ""
+echo "Step 5: Restoring original subgraph-config.json files..."
+echo "----------------------------------------"
+
+# Restore original configs (cleanup will also run via trap, but we do it explicitly here)
+SERVICES=("CustomerService" "SpendingService" "TransactionService")
+for SERVICE in "${SERVICES[@]}"; do
+    SERVICE_DIR="$PROJECT_ROOT/Services/$SERVICE"
+    if [ -f "$SERVICE_DIR/subgraph-config.json.backup" ]; then
+        mv "$SERVICE_DIR/subgraph-config.json.backup" "$SERVICE_DIR/subgraph-config.json"
+        echo "✓ Restored $SERVICE subgraph-config.json"
+    fi
+done
+
+# Disable cleanup trap since we've already restored
+trap - EXIT
+
+echo ""
 echo "=========================================="
 if [ -f "$GATEWAY_DIR/gateway.docker.fgp" ]; then
     echo "✓ Gateway configuration generated successfully!"
     echo "  File: $GATEWAY_DIR/gateway.docker.fgp"
     echo ""
     echo "The gateway will automatically use this file when running in Docker."
+    echo ""
+    echo "Note: subgraph-config.json files have been restored to localhost for local development."
 else
     echo "✗ Failed to generate gateway.docker.fgp"
     echo "  Please check the errors above and ensure:"

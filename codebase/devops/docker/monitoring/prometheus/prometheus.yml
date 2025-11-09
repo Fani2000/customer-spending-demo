@@ -1,0 +1,68 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'customer-spending-dashboard'
+    environment: 'development'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Gateway Service
+  - job_name: 'gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['gateway:8080']
+        labels:
+          service: 'gateway'
+          component: 'api-gateway'
+
+  # Customer Service
+  - job_name: 'customer-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['customer-service:8080']
+        labels:
+          service: 'customer-service'
+          component: 'backend-service'
+
+  # Spending Service
+  - job_name: 'spending-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['spending-service:8080']
+        labels:
+          service: 'spending-service'
+          component: 'backend-service'
+
+  # Transaction Service
+  - job_name: 'transaction-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['transaction-service:8080']
+        labels:
+          service: 'transaction-service'
+          component: 'backend-service'
+
+  # PostgreSQL Exporter (if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+        labels:
+          service: 'postgres'
+          component: 'database'
+

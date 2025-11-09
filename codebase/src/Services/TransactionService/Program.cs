@@ -1,5 +1,6 @@
 using CustomerSpendingDashboard.Services.Transaction.GraphQL;
 using CustomerSpendingDashboard.Services.Transaction.Services;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.AddGraphQL()
     .AddMutationType<Mutation>();
 
 var app = builder.Build();
+
+// Expose Prometheus metrics endpoint
+app.UseMetricServer(); // Exposes /metrics endpoint
+app.UseHttpMetrics();  // Tracks HTTP metrics
 
 app.MapGraphQL();
 

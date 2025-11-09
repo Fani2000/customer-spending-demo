@@ -31,5 +31,8 @@ builder
     .WithSubgraph(spendingService)
     .WithSubgraph(transactionService);
 
+// Note: Prometheus and Grafana are available in Docker Compose setup
+// For monitoring, use: codebase/devops/docker/docker-compose.yml
+
 // Important: Use 'Compose' before 'Run' to enable build-time composition
 builder.Build().Compose().Run();

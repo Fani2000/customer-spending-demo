@@ -217,3 +217,102 @@ networkPolicy:
 serviceMonitor:
   enabled: false
 
+# Prometheus Configuration
+prometheus:
+  enabled: true
+  image:
+    repository: prom/prometheus
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9090
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+  retention:
+    time: "200h"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  scrapeConfigs:
+    - job_name: 'gateway'
+      metrics_path: '/metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+              - {{ .Release.Namespace }}
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: '.*-gateway'
+          action: keep
+    - job_name: 'customer-service'
+      metrics_path: '/metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+              - {{ .Release.Namespace }}
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: '.*-customer-service'
+          action: keep
+    - job_name: 'spending-service'
+      metrics_path: '/metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+              - {{ .Release.Namespace }}
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: '.*-spending-service'
+          action: keep
+    - job_name: 'transaction-service'
+      metrics_path: '/metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+              - {{ .Release.Namespace }}
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: '.*-transaction-service'
+          action: keep
+
+# Grafana Configuration
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  adminUser: admin
+  adminPassword: admin
+  service:
+    type: ClusterIP
+    port: 3000
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "200m"
+  datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://customer-spending-dashboard-prometheus:9090
+      access: proxy
+      isDefault: true
+
