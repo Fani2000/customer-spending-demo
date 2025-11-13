@@ -48,7 +48,7 @@ A responsive financial analytics dashboard that displays a customer's spending d
 
 **Frontend**
 
-* Framework: React (functional components + hooks) or Vue 3.
+* Framework: React (functional components + hooks).
 * Styling: Tailwind CSS.
 * Charts: Recharts or Chart.js.
 * State: React Query (remote state) + Context API.
