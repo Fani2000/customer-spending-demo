@@ -6,6 +6,8 @@ A responsive financial analytics dashboard that displays a customer's spending d
 
 ---
 
+https://drive.google.com/file/d/1rF5kfVaOiz4oBIm8od_xsfkDHt3w-h4P/view?usp=sharing
+
 ## Contents
 
 1. Goals & requirements
@@ -56,9 +58,9 @@ A responsive financial analytics dashboard that displays a customer's spending d
 
 **Backend / API**
 
-* Node.js + Express (mock API or real backend)
-* Database: PostgreSQL (SQL) or MongoDB (NoSQL)
-* ORM: Prisma / Sequelize (SQL) or Mongoose (NoSQL)
+* C#, Hotchocolate, (mock API or real backend)
+* Database: PostgreSQL (SQL), Redis
+* ORM: EntityFramework Core
 
 ---
 
